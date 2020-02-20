@@ -8,7 +8,7 @@
         <!--        中间文字的颜色-->
         <attr name="time_text_color" format="color" />
         <!--        中间文字的大小-->
-        <attr name="time_textSize" format="dimension" />
+        <attr name="time_text_size" format="dimension" />
         <!--        时间进度的颜色-->
         <attr name="time_pro_color" format="color" />
         <!--        时间进度的宽度-->

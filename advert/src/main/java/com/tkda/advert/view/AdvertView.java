@@ -59,7 +59,7 @@ public class AdvertView extends FrameLayout {
         progressWidth = typedArray.getDimensionPixelSize(R.styleable.AdvertView_time_pro_width, DensityUtils.dp2px(context, defProgressWidth));
 
         textColor = typedArray.getColor(R.styleable.AdvertView_time_text_color, defTextColor);
-        textSize = typedArray.getDimensionPixelSize(R.styleable.AdvertView_time_textSize, DensityUtils.sp2px(context, defTextSize));
+        textSize = typedArray.getDimensionPixelSize(R.styleable.AdvertView_time_text_size, DensityUtils.sp2px(context, defTextSize));
 
         time = typedArray.getInteger(R.styleable.AdvertView_time_num, defTime);
 
