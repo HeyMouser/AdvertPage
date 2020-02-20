@@ -67,7 +67,33 @@
 |setFinishInterfece|FinishInterfece|倒计时结束回调|
 
 
+# 使用
+①
+Step 1. Add the JitPack repository to your build file
+Add it in your root build.gradle at the end of repositories:
 
+```java
+allprojects {
+        repositories {
+            ...
+            maven { url 'https://jitpack.io' }
+        }
+    }
+```
+
+Step 2. Add the dependency
+
+```java
+dependencies {
+            implementation 'com.github.HeyMouser:AdvertPage:0.1'
+    }
+```
+②
+直接下载advert，并依赖
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200220162928446.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2RhcmxpbmdfUg==,size_16,color_FFFFFF,t_70)
+```java
+implementation project(':advert')
+```
 
 
 
