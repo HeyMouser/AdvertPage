@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AdvertView">
+        <!--        是否显示计时-->
+        <attr name="show" format="boolean" />
+        <!--        整体背景-->
+        <attr name="time_bg" format="color" />
+        <!--        中间文字的颜色-->
+        <attr name="time_text_color" format="color" />
+        <!--        中间文字的大小-->
+        <attr name="time_textSize" format="dimension" />
+        <!--        时间进度的颜色-->
+        <attr name="time_pro_color" format="color" />
+        <!--        时间进度的宽度-->
+        <attr name="time_pro_width" format="dimension" />
+        <!--        时间数值-->
+        <attr name="time_num" format="integer" />
+        <!--        圆形半径-->
+        <attr name="time_radius" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="CountDownView">
+        <!--        整体背景-->
+        <attr name="circleBg" format="color" />
+        <!--        中间文字的颜色-->
+        <attr name="textColor" format="color" />
+        <!--        中间文字的大小-->
+        <attr name="textSize" format="dimension" />
+        <!--        时间进度的颜色-->
+        <attr name="progressColor" format="color" />
+        <!--        时间进度的宽度-->
+        <attr name="progressWidth" format="dimension" />
+        <!--        时间数值-->
+        <attr name="time" format="integer" />
+        <!--        圆形半径-->
+        <attr name="radius" format="dimension" />
+    </declare-styleable>
+</resources>
