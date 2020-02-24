@@ -10,17 +10,17 @@
         android:id="@+id/advert"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:ad_time_bg="#993d3d3d"
+        app:ad_time_num="3000"
+        app:ad_time_pro_color="#ff0000"
+        app:ad_time_pro_width="3dp"
+        app:ad_time_radius="30dp"
+        app:ad_time_show="true"
+        app:ad_time_text_color="#fefefe"
+        app:ad_time_text_size="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:show="true"
-        app:time_bg="#993d3d3d"
-        app:time_num="5"
-        app:time_pro_color="#ff0000"
-        app:time_pro_width="3dp"
-        app:time_radius="30dp"
-        app:time_text_size="14sp"
-        app:time_text_color="#ff0000" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

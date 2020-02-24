@@ -17,4 +17,11 @@
         android:layout_marginTop="18dp"
         android:layout_marginRight="18dp" />
 
+    <com.tkda.advert.view.LoadingView
+        android:id="@+id/iv_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
 </FrameLayout>

@@ -1,12 +1,13 @@
 package com.tkda.advert.http;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.view.Menu;
 
-import com.tkda.advert.R;
 import com.tkda.advert.interf.HttpCallBack;
+import com.tkda.advert.tools.cache.LocalCacheUtils;
+import com.tkda.advert.tools.cache.MemoryCacheUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +17,17 @@ import java.net.URL;
 
 public class DownLoadResource extends AsyncTask<String, Void, Bitmap> {
 
+    private Context context;
+    private String url;
     private HttpCallBack httpCallBack;
+    private LocalCacheUtils mLocalCacheUtils;
+    private MemoryCacheUtils mMemoryCacheUtils;
+
+    public DownLoadResource(Context context) {
+        this.context = context;
+        mLocalCacheUtils = new LocalCacheUtils();
+        mMemoryCacheUtils = new MemoryCacheUtils();
+    }
 
     public void setHttpCallBack(HttpCallBack httpCallBack) {
         this.httpCallBack = httpCallBack;
@@ -28,7 +39,9 @@ public class DownLoadResource extends AsyncTask<String, Void, Bitmap> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-//        dialog.show();
+        if (httpCallBack != null) {
+            httpCallBack.onStart();
+        }
     }
 
     /**
@@ -37,7 +50,9 @@ public class DownLoadResource extends AsyncTask<String, Void, Bitmap> {
     @Override
     protected Bitmap doInBackground(String... arg0) {
         // 使用网络连接类HttpClient类王城对网络数据的提取
-        return getNetWorkBitmap(arg0[0]);
+        url = arg0[0];
+        Bitmap bitmap = getNetWorkBitmap(url);
+        return bitmap;
     }
 
     /**
@@ -46,31 +61,46 @@ public class DownLoadResource extends AsyncTask<String, Void, Bitmap> {
     @Override
     protected void onPostExecute(Bitmap result) {
         super.onPostExecute(result);
+        if (result != null) {
+            //从网络获取图片后,保存至本地缓存
+            mLocalCacheUtils.setBitmapToLocal(url, result);
+            //保存至内存中
+            mMemoryCacheUtils.setBitmapToMemory(url, result);
+        }
         if (httpCallBack != null) {
-            httpCallBack.onSuccess(result);
+            httpCallBack.onFinish(result);
         }
     }
 
-    public static Bitmap getNetWorkBitmap(String urlString) {
-        URL imgUrl = null;
+    public Bitmap getNetWorkBitmap(String urlString) {
+        URL imgUrl;
+        HttpURLConnection urlConn = null;
         Bitmap bitmap = null;
         try {
             imgUrl = new URL(urlString);
             // 使用HttpURLConnection打开连接
-            HttpURLConnection urlConn = (HttpURLConnection) imgUrl.openConnection();
+            urlConn = (HttpURLConnection) imgUrl.openConnection();
+            urlConn.setConnectTimeout(5000);
+            urlConn.setReadTimeout(5000);
+            urlConn.setRequestMethod("GET");
             urlConn.setDoInput(true);
             urlConn.connect();
-            // 将得到的数据转化成InputStream
-            InputStream is = urlConn.getInputStream();
-            // 将InputStream转换成Bitmap
-            bitmap = BitmapFactory.decodeStream(is);
-            is.close();
+            int responseCode = urlConn.getResponseCode();
+            if (responseCode == 200) {
+                // 将得到的数据转化成InputStream
+                InputStream is = urlConn.getInputStream();
+                // 将InputStream转换成Bitmap
+                bitmap = BitmapFactory.decodeStream(is);
+                is.close();
+            }
         } catch (MalformedURLException e) {
-            System.out.println("[getNetWorkBitmap->]MalformedURLException");
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("[getNetWorkBitmap->]IOException");
             e.printStackTrace();
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
         }
         return bitmap;
     }
