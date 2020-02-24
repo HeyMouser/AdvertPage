@@ -14,6 +14,4 @@ public interface AdvertListener {
      * 2、点击广告进入广告落地页且从落地页back回去
      */
     void onADDismiss();
-
-    void onPermission(List<String> permissions);
 }

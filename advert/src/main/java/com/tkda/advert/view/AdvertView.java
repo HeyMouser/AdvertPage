@@ -24,6 +24,7 @@ import com.tkda.advert.R;
 import com.tkda.advert.http.DownLoadResource;
 import com.tkda.advert.interf.AdvertListener;
 import com.tkda.advert.interf.HttpCallBack;
+import com.tkda.advert.interf.PermissionListener;
 import com.tkda.advert.interf.TimeListener;
 import com.tkda.advert.tools.DensityUtils;
 import com.tkda.advert.tools.cache.LocalCacheUtils;
@@ -231,7 +232,7 @@ public class AdvertView extends FrameLayout {
         startTime();
     }
 
-    public void setImage(String url) {
+    public void setImage(String url, PermissionListener permissionListener) {
         //判断读写权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             List<String> permissions = new ArrayList<>();
@@ -245,8 +246,8 @@ public class AdvertView extends FrameLayout {
             if (!hasWritePermission) {
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             }
-            if (permissions.size() > 0 && advertListener != null) {
-                advertListener.onPermission(permissions);
+            if (permissions.size() > 0) {
+                permissionListener.onPermission(permissions);
                 return;
             }
         }
@@ -283,12 +284,7 @@ public class AdvertView extends FrameLayout {
 
                     @Override
                     public void onFinish(Bitmap bitmap) {
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                loading.setVisibility(GONE);
-                            }
-                        }, 3000);
+                        loading.setVisibility(GONE);
                         Log.i("TAG", "-=-=网络图");
                         setImage(bitmap);
                     }

@@ -124,6 +124,9 @@ public class LoadingView extends View {
     }
 
     public void start() {
+        if (handler == null) {
+            handler = new Handler();
+        }
         handler.post(runnable);
     }
 }

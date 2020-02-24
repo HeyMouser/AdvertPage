@@ -6,57 +6,34 @@ import androidx.core.content.ContextCompat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.tkda.advert.interf.AdvertListener;
+import com.tkda.advert.interf.PermissionListener;
 import com.tkda.advert.view.AdvertView;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PermissionListener {
     private final int REQUESTPERMISSION_CODE = 1001;
+    private AdvertView advert;
+    private String url = "https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1582273722&di=b5ecf3fcc90f2213ca38393a3543de8d&src=http://file02.16sucai.com/d/file/2014/0822/b44cd1310d09026f6dd1f0633a1cc2a5.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AdvertView advert = findViewById(R.id.advert);
-        // 这个方法必须先执行
-        advert.setAdvertListener(new AdvertListener() {
-            @Override
-            public void onADClick() {
-                Toast.makeText(MainActivity.this, "广告点击", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onADDismiss() {
-                Toast.makeText(MainActivity.this, "结束", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(MainActivity.this, Main2Activity.class));
-                finish();
-            }
-
-            @Override
-            public void onPermission(List<String> permissions) {
-                if (permissions != null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        int size = permissions.size();
-                        String[] permission = new String[size];
-                        for (int i = 0; i < size; i++) {
-                            permission[i] = permissions.get(i);
-                        }
-                        requestPermissions(permission, REQUESTPERMISSION_CODE);
-                    }
-                }
-            }
-        });
-        advert.setImage("https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1582273722&di=b5ecf3fcc90f2213ca38393a3543de8d&src=http://file02.16sucai.com/d/file/2014/0822/b44cd1310d09026f6dd1f0633a1cc2a5.jpg");
+        advert = findViewById(R.id.advert);
 //        advert.setImage(R.drawable.ic_launcher_background);
 
         advert.setLoading_color(Color.parseColor("#0000ff"));// 设置loading的颜色
-        advert.setLoading_width(1); // 设置loading的粗细
+        advert.setLoading_width(2); // 设置loading的粗细
         advert.setLoading_radius(30);// 设置加载loading大小
 
 //        advert.setTime_bg(Color.parseColor("#ff0000")); // 设置倒计时按钮的背景颜色
@@ -69,13 +46,54 @@ public class MainActivity extends AppCompatActivity {
 
 //        advert.setTime_view_show(true);// 设置倒计时是否显示，默认true
         advert.setTime_show(true); // 设置倒计时秒数是否显示，false
+        advert.setImage(url, this);
+
+        advert.setAdvertListener(new AdvertListener() {
+            @Override
+            public void onADClick() {
+                Toast.makeText(MainActivity.this, "广告点击", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onADDismiss() {
+                Toast.makeText(MainActivity.this, "结束", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MainActivity.this, Main2Activity.class));
+                finish();
+            }
+        });
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUESTPERMISSION_CODE) {
+            List<String> list = new ArrayList<>();
+            if (permissions.length > 0) {
+                for (int i = 0; i < permissions.length; i++) {
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, permissions[i]) != PackageManager.PERMISSION_GRANTED) {
+                        list.add(permissions[i]);
+                    }
+                }
+            }
+            if (list.size() > 0) {
+                Toast.makeText(MainActivity.this, "请允许权限", Toast.LENGTH_SHORT).show();
+            } else {
+                advert.setImage(url, this);
+            }
+        }
+    }
 
+    @Override
+    public void onPermission(List<String> permissions) {
+        if (permissions != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                int size = permissions.size();
+                String[] permission = new String[size];
+                for (int i = 0; i < size; i++) {
+                    permission[i] = permissions.get(i);
+                }
+                requestPermissions(permission, REQUESTPERMISSION_CODE);
+            }
         }
     }
 }
