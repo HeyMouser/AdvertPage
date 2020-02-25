@@ -5,37 +5,39 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.tkda.advert.R;
-import com.tkda.advert.http.DownLoadResource;
+import com.tkda.advert.http.DownLoadFile;
 import com.tkda.advert.interf.AdvertListener;
 import com.tkda.advert.interf.HttpCallBack;
 import com.tkda.advert.interf.PermissionListener;
 import com.tkda.advert.interf.TimeListener;
 import com.tkda.advert.tools.DensityUtils;
-import com.tkda.advert.tools.cache.LocalCacheUtils;
-import com.tkda.advert.tools.cache.MemoryCacheUtils;
+import com.tkda.advert.tools.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
 
 public class AdvertView extends FrameLayout {
     private Context mContext;
     private ImageView imageView;
+    private GifImageView iv_gif;
     private CountDownView countDownView;
     private LoadingView loading;
 
@@ -105,6 +107,7 @@ public class AdvertView extends FrameLayout {
         View view = View.inflate(context, R.layout.advert_layout, this);
         loading = view.findViewById(R.id.iv_loading);
         imageView = view.findViewById(R.id.image);
+        iv_gif = view.findViewById(R.id.iv_gif);
         countDownView = view.findViewById(R.id.cd_view);
 
         loading.setColor(loading_color);
@@ -119,7 +122,7 @@ public class AdvertView extends FrameLayout {
         countDownView.setTime(time_num);
         countDownView.setRadius(time_radius);
 
-        imageView.setOnClickListener(new OnClickListener() {
+        view.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (advertListener != null) {
@@ -227,13 +230,113 @@ public class AdvertView extends FrameLayout {
 
     public void setImage(Bitmap bitmap) {
         if (imageView != null) {
+            imageView.setVisibility(VISIBLE);
             imageView.setImageBitmap(bitmap);
         }
         startTime();
     }
 
+    public void setGif(int resourceId) {
+        try {
+            GifDrawable gifDrawable = new GifDrawable(mContext.getResources(), resourceId);
+            if (iv_gif != null) {
+                iv_gif.setVisibility(VISIBLE);
+                iv_gif.setImageDrawable(gifDrawable);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        startTime();
+    }
+
+
+    private void setGif(File file) {
+        if (iv_gif != null) {
+            iv_gif.setVisibility(VISIBLE);
+            try {
+                GifDrawable gifDrawable = new GifDrawable(file);
+                iv_gif.setImageDrawable(gifDrawable);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("TAG", "-=-=setGif异常:" + e.getMessage());
+            }
+        }
+        startTime();
+    }
+
+    public void setGif(final String url, PermissionListener permissionListener) {
+        //判断读写权限
+        if (checkPermission(permissionListener)) return;
+        if (url != null) {
+            //第一步去本地查找
+            File file = new FileUtils(mContext).getFile(url);
+            if (file.exists()) {
+                Log.i("TAG", "-=-=本地中有图:" + file.getAbsolutePath());
+                setGif(file);
+                return;
+            }
+            //第二步去网络下载
+            if (url.contains("http")) {
+                DownLoadFile downLoadFile = new DownLoadFile(mContext);
+                downLoadFile.setHttpCallBack(new HttpCallBack() {
+                    @Override
+                    public void onStart() {
+                        loading.setVisibility(VISIBLE);
+                        loading.start();
+                    }
+
+                    @Override
+                    public void onResult(File file) {
+                        loading.setVisibility(GONE);
+                        Log.i("TAG", "-=-=网络图");
+                        setGif(file);
+                    }
+                });
+                downLoadFile.execute(url);
+            }
+        }
+    }
+
     public void setImage(String url, PermissionListener permissionListener) {
         //判断读写权限
+        if (checkPermission(permissionListener)) return;
+        if (url != null) {
+            //第一步去本地查找
+            File file = new FileUtils(mContext).getFile(url);
+            if (file != null) {
+                Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                if (bitmap != null) {
+                    Log.i("TAG", "-=-=本地中有图:" + file.getAbsolutePath());
+                    setImage(bitmap);
+                    return;
+                }
+            }
+            //第二步去网络下载
+            if (url.contains("http")) {
+                DownLoadFile downLoadFile = new DownLoadFile(mContext);
+                downLoadFile.setHttpCallBack(new HttpCallBack() {
+                    @Override
+                    public void onStart() {
+                        loading.setVisibility(VISIBLE);
+                        loading.start();
+                    }
+
+                    @Override
+                    public void onResult(File file) {
+                        loading.setVisibility(GONE);
+                        Log.i("TAG", "-=-=网络图");
+                        if (file != null) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                            setImage(bitmap);
+                        }
+                    }
+                });
+                downLoadFile.execute(url);
+            }
+        }
+    }
+
+    private boolean checkPermission(PermissionListener permissionListener) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             List<String> permissions = new ArrayList<>();
             int checkReadResutl = ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -248,49 +351,9 @@ public class AdvertView extends FrameLayout {
             }
             if (permissions.size() > 0) {
                 permissionListener.onPermission(permissions);
-                return;
+                return true;
             }
         }
-        if (url != null) {
-            Bitmap bitmap = null;
-            //第一步去内存查找
-            bitmap = new MemoryCacheUtils().getBitmapFromMemory(url);
-            if (bitmap != null) {
-                Log.i("TAG", "-=-=内存中有图");
-                setImage(bitmap);
-                return;
-            }
-            //第二步去本地查找
-            bitmap = new LocalCacheUtils().getBitmapFromLocal(url);
-            if (bitmap != null) {
-                Log.i("TAG", "-=-=本地中有图");
-                setImage(bitmap);
-                return;
-            }
-            //第三步去网络下载
-            if (url.contains("http")) {
-                DownLoadResource downLoadResource = new DownLoadResource(mContext);
-                downLoadResource.setHttpCallBack(new HttpCallBack() {
-                    @Override
-                    public void onStart() {
-                        loading.setVisibility(VISIBLE);
-                        loading.start();
-                    }
-
-                    @Override
-                    public void onLoading() {
-
-                    }
-
-                    @Override
-                    public void onFinish(Bitmap bitmap) {
-                        loading.setVisibility(GONE);
-                        Log.i("TAG", "-=-=网络图");
-                        setImage(bitmap);
-                    }
-                });
-                downLoadResource.execute(url);
-            }
-        }
+        return false;
     }
 }
