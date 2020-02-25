@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
-        classpath 'org.greenrobot:greendao-gradle-plugin:3.2.2' // 一定要添加，greendao使用
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -18,9 +18,7 @@ allprojects {
     repositories {
         google()
         jcenter()
-        mavenCentral()
         maven { url 'https://jitpack.io' }
-        maven { url "https://dl.bintray.com/yidian-android/open_android_sdk/" }
     }
 }
 
